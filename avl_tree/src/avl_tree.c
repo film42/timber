@@ -39,9 +39,20 @@ avl_tree_t * avl_init( void ) {
   return tree;
 }
 
+static deinit_recur( avl_node_t * node ) {
+  if(node->child_left != NULL) {
+    deinit_recur(node->child_left);
+  }
+  if(node->child_right != NULL) {
+    deinit_recur(node->child_right);
+  }
+
+  avl_node_deinit( node );
+}
+
 void avl_deinit( avl_tree_t * tree  ) {
   if(tree->head != NULL) {
-    avl_node_deinit(tree->head);
+    deinit_recur(tree->head);
   }
   free(tree);
 }

@@ -48,13 +48,13 @@ FILE(
 # GMOCK AND OTHER DEPENDENCIES
 #
 
-IF (UNIX)
-  FIND_LIBRARY(
-    DL
-    NAMES
-    dl
-    )
-ENDIF (UNIX)
+# IF (UNIX)
+#   FIND_LIBRARY(
+#     DL
+#     NAMES
+#     dl
+#     )
+# ENDIF (UNIX)
 
 #
 # CREATE LIBRARY

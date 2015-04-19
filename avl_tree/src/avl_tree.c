@@ -99,7 +99,7 @@ static avl_node_t * balance_node( avl_node_t * node ) {
   if( balance > 1 ) {
     /* Balance right */
     if( get_height(node->child_left->child_right) > get_height(node->child_left->child_left) ) {
-      node->child_left = rotate_left( node );
+      node->child_left = rotate_left( node->child_left );
     }
 
     return rotate_right( node );
@@ -107,7 +107,7 @@ static avl_node_t * balance_node( avl_node_t * node ) {
   } else if( balance < -1 ) {
     /* Blanace left */
     if( get_height(node->child_right->child_left) > get_height(node->child_right->child_right) ) {
-      node->child_right = rotate_right( node );
+      node->child_right = rotate_right( node->child_right );
     }
 
     return rotate_left( node );
@@ -225,18 +225,22 @@ void * avl_get( avl_tree_t * tree, void * key ) {
 }
 
 static size_t contains_recur( avl_node_t * node, char * data ) {
-  size_t comparison = strcmp(node->data, data);
+  if(node == NULL) {
+    return 0;
+  }
+
+  int comparison = strcmp(node->data, data);
 
   /* Matching */
   if( comparison == 0 ) {
     return 1;
   }
 
-  /* Walk down a specific tree */
-  if( comparison >= 1 && node->child_left != NULL ) {
+  /* Walk down a specific branch */
+  if( comparison > 0) {
     return contains_recur( node->child_left, data );
   }
-  else if( comparison <= -1 && node->child_right != NULL ) {
+  else if( comparison < 0) {
     return contains_recur( node->child_right, data );
   }
 
@@ -245,7 +249,7 @@ static size_t contains_recur( avl_node_t * node, char * data ) {
 }
 
 size_t avl_contains( avl_tree_t * tree, char * data ) {
-  if( tree->head == NULL ) {
+  if( tree == NULL ) {
     return 0;
   }
 

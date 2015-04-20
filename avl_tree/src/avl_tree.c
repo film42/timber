@@ -116,7 +116,7 @@ static avl_node_t * balance_node( avl_node_t * node ) {
 }
 
 /* I don't like this implementation, so fix it later */
-static avl_node_t * insert_recur( avl_node_t * node, char * key, char * value ) {
+static avl_node_t * insert_recur( avl_node_t * node, char * key, void * value ) {
   /* Return new node if node is NULL */
   if(node == NULL) {
     /* Create new node */
@@ -140,7 +140,7 @@ static avl_node_t * insert_recur( avl_node_t * node, char * key, char * value ) 
   return node;
 }
 
-void avl_insert( avl_tree_t * tree, char * key, char * value ) {
+void avl_insert( avl_tree_t * tree, char * key, void * value, int value_size) {
   /* Check to see if we already have the string */
   if( avl_contains(tree, key) ) { return; }
 
@@ -148,8 +148,8 @@ void avl_insert( avl_tree_t * tree, char * key, char * value ) {
   size_t length = strlen(key);
   char * m_key = malloc( sizeof(char) * (length + 1) );
   strcpy(m_key, key);
-  char * m_value = malloc( sizeof(char) * (strlen(value) + 1) );
-  strcpy(m_value, value);
+  char * m_value = malloc( value_size );
+  memcpy(m_value, value, value_size);
 
   tree->head = insert_recur(tree->head, m_key, m_value);
   tree->count++;
@@ -244,7 +244,7 @@ static avl_node_t * get_recur( avl_node_t * node, char * key ) {
   }
 }
 
-char * avl_get( avl_tree_t * tree, void * key ) {
+void * avl_get( avl_tree_t * tree, void * key ) {
   avl_node_t * node = get_recur( tree->head, key );
 
   if( node != NULL ) {

@@ -16,9 +16,9 @@ typedef struct {
 
 avl_tree_t * avl_init( void );
 void avl_deinit( avl_tree_t * tree );
-void avl_insert( avl_tree_t * tree, char * key, char * data );
+void avl_insert( avl_tree_t * tree, char * key, void * value, int value_size );
 void avl_delete( avl_tree_t * tree, char * key );
-char * avl_get( avl_tree_t * tree, void * key );
+void * avl_get( avl_tree_t * tree, void * key );
 size_t avl_contains( avl_tree_t * tree, char * key );
 size_t avl_count( avl_tree_t * tree );
 void avl_print( avl_tree_t * tree );

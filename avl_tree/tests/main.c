@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <avl_tree.h>
 #include <string.h>
 #include "min_unit.h"
@@ -14,35 +15,53 @@ static char * avl_insert_tests() {
 
   mu_assert( "Count is 0", avl_count(tree) == 0 );
 
-  avl_insert(tree, "Hello!", "test");
+  avl_insert(tree, "Hello!", "test", (sizeof(char) * 5));
   mu_assert( "Count is 1", avl_count(tree) == 1 );
   mu_assert( "Contains 'Hello!'", avl_contains(tree, "Hello!") );
 
-  avl_insert(tree, "Hello!", "test");
+  avl_insert(tree, "Hello!", "test", (sizeof(char) * 5));
   mu_assert( "Count is still 1", avl_count(tree) == 1 );
 
-  avl_insert(tree, "Play!", "test");
+  avl_insert(tree, "Play!", "test", (sizeof(char) * 5));
   mu_assert( "Count is 2", avl_count(tree) == 2 );
   mu_assert( "Contains 'Play!'", avl_contains(tree, "Play!") );
 
-  avl_insert(tree, "Mark", "test");
-  avl_insert(tree, "fun", "test");
-  avl_insert(tree, "hannah", "test");
-  avl_insert(tree, "garrett", "test");
+  avl_insert(tree, "Mark", "test", (sizeof(char) * 5));
+  avl_insert(tree, "fun", "test", (sizeof(char) * 5));
+  avl_insert(tree, "hannah", "test", (sizeof(char) * 5));
+  avl_insert(tree, "garrett", "test", (sizeof(char) * 5));
 
   mu_assert( "Count is 6", avl_count(tree) == 6 );
 
   avl_deinit(tree);
+  return 0;
+}
 
+static char * avl_insert_weird_things_tests() {
+  avl_tree_t * tree  = avl_init();
+
+  typedef struct {
+    int number;
+  } example_t;
+
+  example_t * thing = (example_t *)malloc(sizeof(example_t));
+  thing->number = 1337;
+  avl_insert(tree, "struct", thing, sizeof(example_t));
+  free(thing);
+
+  example_t * example = (example_t *)avl_get(tree, "struct");
+  mu_assert( "Can access thing after free'd by callee", example->number == 1337 );
+
+  avl_deinit(tree);
   return 0;
 }
 
 static char * avl_contains_tests() {
   avl_tree_t * tree  = avl_init();
-  avl_insert(tree, "Hello!", "test");
-  avl_insert(tree, "3", "test");
-  avl_insert(tree, "4", "test");
-  avl_insert(tree, "5", "test123");
+  avl_insert(tree, "Hello!", "test", (sizeof(char) * 5));
+  avl_insert(tree, "3", "test", (sizeof(char) * 5));
+  avl_insert(tree, "4", "test", (sizeof(char) * 5));
+  avl_insert(tree, "5", "test123", (sizeof(char) * 8));
 
   mu_assert( "Contains 'Hello!'", avl_contains(tree, "Hello!") );
   mu_assert( "Contains '3'", avl_contains(tree, "3") );
@@ -55,17 +74,16 @@ static char * avl_contains_tests() {
   mu_assert( "Doesn't contain '7'", !avl_contains(tree, "7") );
 
   avl_deinit(tree);
-
   return 0;
 }
 
 static char * avl_delete_tests() {
   avl_tree_t * tree  = avl_init();
-  avl_insert(tree, "1", "test");
-  avl_insert(tree, "2", "test");
-  avl_insert(tree, "3", "test");
-  avl_insert(tree, "4", "test");
-  avl_insert(tree, "5", "test");
+  avl_insert(tree, "1", "test", (sizeof(char) * 5));
+  avl_insert(tree, "2", "test", (sizeof(char) * 5));
+  avl_insert(tree, "3", "test", (sizeof(char) * 5));
+  avl_insert(tree, "4", "test", (sizeof(char) * 5));
+  avl_insert(tree, "5", "test", (sizeof(char) * 5));
 
   mu_assert( "Contains '3'", avl_contains(tree, "3") );
   avl_delete(tree, "3");
@@ -101,7 +119,7 @@ static char * avl_endurance_tests() {
     size_t length = (sizeof(char) * 6);
     char new_key[length];
     snprintf(new_key, length, "%zu", i);
-    avl_insert(tree, new_key, "test");
+    avl_insert(tree, new_key, "test", (sizeof(char) * 5));
   }
 
   mu_assert( "Contains '99000'", avl_contains(tree, "99000") );
@@ -115,6 +133,8 @@ static char * avl_endurance_tests() {
 static char * avl_all_tests() {
   running_test("Insert Tests");
   mu_run_test(avl_insert_tests);
+  running_test("Insert Weird Things Tests");
+  mu_run_test(avl_insert_weird_things_tests);
   running_test("Contains Tests");
   mu_run_test(avl_contains_tests);
   running_test("Delete Tests");

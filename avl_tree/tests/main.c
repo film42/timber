@@ -93,6 +93,25 @@ static char * avl_delete_tests() {
   return 0;
 }
 
+static char * avl_endurance_tests() {
+  avl_tree_t * tree  = avl_init();
+
+  size_t i = 0;
+  for(; i < 100000; ++i) {
+    size_t length = (sizeof(char) * 6);
+    char new_key[length];
+    snprintf(new_key, length, "%zu", i);
+    avl_insert(tree, new_key, "test");
+  }
+
+  mu_assert( "Contains '99000'", avl_contains(tree, "99000") );
+  avl_delete(tree, "99000");
+  mu_assert( "Value '99000' was removed", !avl_contains(tree, "99000") );
+
+  avl_deinit(tree);
+  return 0;
+}
+
 static char * avl_all_tests() {
   running_test("Insert Tests");
   mu_run_test(avl_insert_tests);
@@ -100,6 +119,8 @@ static char * avl_all_tests() {
   mu_run_test(avl_contains_tests);
   running_test("Delete Tests");
   mu_run_test(avl_delete_tests);
+  running_test("Endurance Tests");
+  mu_run_test(avl_endurance_tests);
   return 0;
 }
 

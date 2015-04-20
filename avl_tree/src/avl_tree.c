@@ -20,18 +20,6 @@ static avl_node_t * avl_node_init() {
   return node;
 }
 
-static void avl_node_deinit( avl_node_t * node ) {
-  if(node->child_left != NULL) {
-    free(node->child_left);
-  }
-  if(node->child_right != NULL) {
-    free(node->child_right);
-  }
-  if(node->data != NULL) {
-    free(node->data);
-  }
-}
-
 avl_tree_t * avl_init( void ) {
   avl_tree_t * tree = (avl_tree_t *)malloc(sizeof(avl_tree_t));
   tree->head = NULL;
@@ -39,7 +27,12 @@ avl_tree_t * avl_init( void ) {
   return tree;
 }
 
-static deinit_recur( avl_node_t * node ) {
+static void avl_node_deinit( avl_node_t * node ) {
+  free(node->data);
+  free(node);
+}
+
+static void deinit_recur( avl_node_t * node ) {
   if(node->child_left != NULL) {
     deinit_recur(node->child_left);
   }
@@ -51,9 +44,13 @@ static deinit_recur( avl_node_t * node ) {
 }
 
 void avl_deinit( avl_tree_t * tree  ) {
+  if(tree == NULL) {
+    return;
+  }
   if(tree->head != NULL) {
     deinit_recur(tree->head);
   }
+
   free(tree);
 }
 
@@ -123,7 +120,6 @@ static avl_node_t * insert_recur( avl_node_t * node, char * data ) {
     /* Create new node */
     avl_node_t * new_node = avl_node_init();
     new_node->data = data;
-
     return new_node;
   }
 
@@ -164,7 +160,7 @@ static avl_node_t * find_small_in_right( avl_node_t * node ) {
 }
 
 static avl_node_t * delete_recur( avl_tree_t * tree, avl_node_t * node, char * data ) {
-  size_t comparison = strcmp(node->data, data);
+  int comparison = strcmp(node->data, data);
   avl_node_t * marked_node;
 
   /* Matching */
@@ -240,12 +236,9 @@ static size_t contains_recur( avl_node_t * node, char * data ) {
   if( comparison > 0) {
     return contains_recur( node->child_left, data );
   }
-  else if( comparison < 0) {
+  else {
     return contains_recur( node->child_right, data );
   }
-
-  /* Uncaught exception */
-  return 0;
 }
 
 size_t avl_contains( avl_tree_t * tree, char * data ) {

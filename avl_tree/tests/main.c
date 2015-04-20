@@ -66,11 +66,26 @@ static char * avl_delete_tests() {
   avl_insert(tree, "5");
 
   mu_assert( "Contains '3'", avl_contains(tree, "3") );
-  avl_print(tree);
   avl_delete(tree, "3");
-  printf("------------\n");
-  avl_print(tree);
   mu_assert( "Value '3' was removed", !avl_contains(tree, "3") );
+
+  mu_assert( "Contains '1'", avl_contains(tree, "1") );
+  avl_delete(tree, "1");
+  mu_assert( "Value '1' was removed", !avl_contains(tree, "1") );
+
+  mu_assert( "Contains '5'", avl_contains(tree, "5") );
+  avl_delete(tree, "5");
+  mu_assert( "Value '5' was removed", !avl_contains(tree, "5") );
+
+  mu_assert( "Contains '2'", avl_contains(tree, "2") );
+  avl_delete(tree, "2");
+  mu_assert( "Value '2' was removed", !avl_contains(tree, "2") );
+
+  mu_assert( "Contains '4'", avl_contains(tree, "4") );
+  avl_delete(tree, "4");
+  mu_assert( "Value '4' was removed", !avl_contains(tree, "4") );
+
+  mu_assert( "Tree is now empty", avl_count(tree) == 0);
 
   avl_deinit(tree);
   return 0;
@@ -81,8 +96,8 @@ static char * avl_all_tests() {
   mu_run_test(avl_insert_tests);
   running_test("Contains Tests");
   mu_run_test(avl_contains_tests);
-  //running_test("Delete Tests");
-  //mu_run_test(avl_delete_tests);
+  running_test("Delete Tests");
+  mu_run_test(avl_delete_tests);
   return 0;
 }
 

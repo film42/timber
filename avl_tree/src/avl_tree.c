@@ -216,8 +216,9 @@ void avl_delete( avl_tree_t * tree, char * data ) {
   tree->head = delete_recur(tree, tree->head, data);
 }
 
+// TODO: Make tree hold values given a key
 void * avl_get( avl_tree_t * tree, void * key ) {
-  return key; /* TODO */
+  return key;
 }
 
 static size_t contains_recur( avl_node_t * node, char * data ) {

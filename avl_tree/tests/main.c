@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <avl_tree.h>
 #include <string.h>
-#include <stdio.h>
 #include "min_unit.h"
 
 int tests_run = 0;
@@ -15,21 +14,21 @@ static char * avl_insert_tests() {
 
   mu_assert( "Count is 0", avl_count(tree) == 0 );
 
-  avl_insert(tree, "Hello!");
+  avl_insert(tree, "Hello!", "test");
   mu_assert( "Count is 1", avl_count(tree) == 1 );
   mu_assert( "Contains 'Hello!'", avl_contains(tree, "Hello!") );
 
-  avl_insert(tree, "Hello!");
+  avl_insert(tree, "Hello!", "test");
   mu_assert( "Count is still 1", avl_count(tree) == 1 );
 
-  avl_insert(tree, "Play!");
+  avl_insert(tree, "Play!", "test");
   mu_assert( "Count is 2", avl_count(tree) == 2 );
   mu_assert( "Contains 'Play!'", avl_contains(tree, "Play!") );
 
-  avl_insert(tree, "Mark");
-  avl_insert(tree, "fun");
-  avl_insert(tree, "hannah");
-  avl_insert(tree, "garrett");
+  avl_insert(tree, "Mark", "test");
+  avl_insert(tree, "fun", "test");
+  avl_insert(tree, "hannah", "test");
+  avl_insert(tree, "garrett", "test");
 
   mu_assert( "Count is 6", avl_count(tree) == 6 );
 
@@ -40,15 +39,18 @@ static char * avl_insert_tests() {
 
 static char * avl_contains_tests() {
   avl_tree_t * tree  = avl_init();
-  avl_insert(tree, "Hello!");
-  avl_insert(tree, "3");
-  avl_insert(tree, "4");
-  avl_insert(tree, "5");
+  avl_insert(tree, "Hello!", "test");
+  avl_insert(tree, "3", "test");
+  avl_insert(tree, "4", "test");
+  avl_insert(tree, "5", "test123");
 
   mu_assert( "Contains 'Hello!'", avl_contains(tree, "Hello!") );
   mu_assert( "Contains '3'", avl_contains(tree, "3") );
   mu_assert( "Contains '4'", avl_contains(tree, "4") );
   mu_assert( "Contains '5'", avl_contains(tree, "5") );
+  mu_assert( "Correct key for '4' => 'test'", strcmp(avl_get(tree, "4"), "test") == 0);
+  mu_assert( "Correct key for '5' => 'test123'", strcmp(avl_get(tree, "5"), "test123") == 0);
+  mu_assert( "Incorrect key for '3' !=> '12test'", strcmp(avl_get(tree, "3"), "12test") != 0);
   mu_assert( "Doesn't contain 'Hllo'", !avl_contains(tree, "Hllo") );
   mu_assert( "Doesn't contain '7'", !avl_contains(tree, "7") );
 
@@ -59,11 +61,11 @@ static char * avl_contains_tests() {
 
 static char * avl_delete_tests() {
   avl_tree_t * tree  = avl_init();
-  avl_insert(tree, "1");
-  avl_insert(tree, "2");
-  avl_insert(tree, "3");
-  avl_insert(tree, "4");
-  avl_insert(tree, "5");
+  avl_insert(tree, "1", "test");
+  avl_insert(tree, "2", "test");
+  avl_insert(tree, "3", "test");
+  avl_insert(tree, "4", "test");
+  avl_insert(tree, "5", "test");
 
   mu_assert( "Contains '3'", avl_contains(tree, "3") );
   avl_delete(tree, "3");

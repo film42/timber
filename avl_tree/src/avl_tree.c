@@ -13,7 +13,8 @@
 
 static avl_node_t * avl_node_init() {
   avl_node_t * node = (avl_node_t *)malloc(sizeof(avl_node_t));
-  node->data = NULL;
+  node->key = NULL;
+  node->value = NULL;
   node->child_left = NULL;
   node->child_right = NULL;
   node->height = 0;
@@ -28,7 +29,8 @@ avl_tree_t * avl_init( void ) {
 }
 
 static void avl_node_deinit( avl_node_t * node ) {
-  free(node->data);
+  free(node->key);
+  free(node->value);
   free(node);
 }
 
@@ -43,7 +45,7 @@ static void deinit_recur( avl_node_t * node ) {
   avl_node_deinit( node );
 }
 
-void avl_deinit( avl_tree_t * tree  ) {
+void avl_deinit( avl_tree_t * tree ) {
   if(tree == NULL) {
     return;
   }
@@ -114,20 +116,22 @@ static avl_node_t * balance_node( avl_node_t * node ) {
 }
 
 /* I don't like this implementation, so fix it later */
-static avl_node_t * insert_recur( avl_node_t * node, char * data ) {
+static avl_node_t * insert_recur( avl_node_t * node, char * key, char * value ) {
   /* Return new node if node is NULL */
   if(node == NULL) {
     /* Create new node */
     avl_node_t * new_node = avl_node_init();
-    new_node->data = data;
+
+    new_node->key = key;
+    new_node->value = value;
     return new_node;
   }
 
   /* Otherwise recursively assign the new values */
-  else if( strcmp(node->data, data) >= 1 ) {
-    node->child_left = insert_recur( node->child_left, data );
+  else if( strcmp(node->key, key) >= 1 ) {
+    node->child_left = insert_recur( node->child_left, key, value );
   } else {
-    node->child_right = insert_recur( node->child_right, data );
+    node->child_right = insert_recur( node->child_right, key, value );
   }
 
   /* Finish insert by balancing the tree at `node' */
@@ -136,16 +140,18 @@ static avl_node_t * insert_recur( avl_node_t * node, char * data ) {
   return node;
 }
 
-void avl_insert( avl_tree_t * tree, char * data ) {
+void avl_insert( avl_tree_t * tree, char * key, char * value ) {
   /* Check to see if we already have the string */
-  if( avl_contains(tree, data) ) { return; }
+  if( avl_contains(tree, key) ) { return; }
 
-  /* Copy data because we can't use stack pointers */
-  size_t length = strlen(data);
-  char * m_data = malloc( sizeof(char) * (length + 1) );
-  strcpy(m_data, data);
+  /* Copy key/ value because we can't use stack pointers */
+  size_t length = strlen(key);
+  char * m_key = malloc( sizeof(char) * (length + 1) );
+  strcpy(m_key, key);
+  char * m_value = malloc( sizeof(char) * (strlen(value) + 1) );
+  strcpy(m_value, value);
 
-  tree->head = insert_recur(tree->head, m_data);
+  tree->head = insert_recur(tree->head, m_key, m_value);
   tree->count++;
 }
 
@@ -159,8 +165,8 @@ static avl_node_t * find_small_in_right( avl_node_t * node ) {
   return node;
 }
 
-static avl_node_t * delete_recur( avl_tree_t * tree, avl_node_t * node, char * data ) {
-  int comparison = strcmp(node->data, data);
+static avl_node_t * delete_recur( avl_tree_t * tree, avl_node_t * node, char * key ) {
+  int comparison = strcmp(node->key, key);
   avl_node_t * marked_node;
 
   /* Matching */
@@ -185,8 +191,9 @@ static avl_node_t * delete_recur( avl_tree_t * tree, avl_node_t * node, char * d
     else {
       marked_node = find_small_in_right(node->child_right);
 
-      node->data = marked_node->data;
-      node->child_right = delete_recur(tree, node->child_right, node->data);
+      node->key = marked_node->key;
+      node->value = marked_node->value;
+      node->child_right = delete_recur(tree, node->child_right, node->key);
     }
 
     /* Free the node */
@@ -196,10 +203,10 @@ static avl_node_t * delete_recur( avl_tree_t * tree, avl_node_t * node, char * d
 
   /* Walk down a specific tree */
   else if( comparison >= 1 && node->child_left != NULL ) {
-    node->child_left = delete_recur(tree, node->child_left, data );
+    node->child_left = delete_recur(tree, node->child_left, key );
   }
   else if( comparison <= -1 && node->child_right != NULL ) {
-    node->child_right = delete_recur(tree, node->child_right, data );
+    node->child_right = delete_recur(tree, node->child_right, key );
   }
 
   if(node != NULL) {
@@ -210,44 +217,49 @@ static avl_node_t * delete_recur( avl_tree_t * tree, avl_node_t * node, char * d
   return node;
 }
 
-void avl_delete( avl_tree_t * tree, char * data ) {
+void avl_delete( avl_tree_t * tree, char * key ) {
   if(tree->head == NULL) return;
 
-  tree->head = delete_recur(tree, tree->head, data);
+  tree->head = delete_recur(tree, tree->head, key);
 }
 
-// TODO: Make tree hold values given a key
-void * avl_get( avl_tree_t * tree, void * key ) {
-  return key;
-}
-
-static size_t contains_recur( avl_node_t * node, char * data ) {
+static avl_node_t * get_recur( avl_node_t * node, char * key ) {
   if(node == NULL) {
-    return 0;
+    return NULL;
   }
 
-  int comparison = strcmp(node->data, data);
+  int comparison = strcmp(node->key, key);
 
   /* Matching */
   if( comparison == 0 ) {
-    return 1;
+    return node;
   }
 
   /* Walk down a specific branch */
   if( comparison > 0) {
-    return contains_recur( node->child_left, data );
+    return get_recur( node->child_left, key );
   }
   else {
-    return contains_recur( node->child_right, data );
+    return get_recur( node->child_right, key );
   }
 }
 
-size_t avl_contains( avl_tree_t * tree, char * data ) {
-  if( tree == NULL ) {
+char * avl_get( avl_tree_t * tree, void * key ) {
+  avl_node_t * node = get_recur( tree->head, key );
+
+  if( node != NULL ) {
+    return node->value;
+  } else {
+    return NULL;
+  }
+}
+
+size_t avl_contains( avl_tree_t * tree, char * key ) {
+  if(avl_get(tree, key)) {
+    return 1;
+  } else {
     return 0;
   }
-
-  return contains_recur(tree->head, data);
 }
 
 size_t avl_count( avl_tree_t * tree ) {
@@ -256,7 +268,7 @@ size_t avl_count( avl_tree_t * tree ) {
 
 static void print_recur( avl_node_t * node ) {
   if( node != NULL ) {
-    printf("%zu  %s\n", node->height, node->data);
+    printf("%zu  %s\n", node->height, node->key);
     print_recur( node->child_left );
     print_recur( node->child_right );
   }

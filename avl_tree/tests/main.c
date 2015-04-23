@@ -31,6 +31,14 @@ static char * avl_insert_tests() {
   avl_insert(tree, "hannah", "test", (sizeof(char) * 5));
   avl_insert(tree, "garrett", "test", (sizeof(char) * 5));
 
+  char * value = (char *)avl_get(tree, "fun");
+  mu_assert( "Can get inserted value 'fun'", strcmp(value, "test") == 0);
+
+  avl_insert(tree, "fun", "party bus", (sizeof(char) * 10));
+
+  value = (char *)avl_get(tree, "fun");
+  mu_assert( "Can get changed value 'fun'", strcmp(value, "party bus") == 0);
+
   mu_assert( "Count is 6", avl_count(tree) == 6 );
 
   avl_deinit(tree);
